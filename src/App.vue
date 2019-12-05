@@ -1,14 +1,14 @@
 <template>
     <div id="app">
-        <div class="main" v-if="current" @click.once="play()">
+        <div class="main" v-if="now" @click.once="play()">
             <div class="main-wthree-row">
                 <div class="agileits-top">
                     <div class="agileinfo-top-row">
                         <div class="agileinfo-top-img">
                             <span></span>
                         </div>
-                        <h3>{{ current.temp_c }}<sup class="degree">°</sup><span>C</span></h3>
-                        <p>{{ location.name }}</p>
+                        <h3>{{ now.temp }}<sup class="degree">°</sup><span>C</span></h3>
+                        <p>{{ city }}</p>
                         <div class="agileinfo-top-time">
                             <div class="date-time">
                                 <div class="dmy">
@@ -21,15 +21,17 @@
                     </div>
                 </div>
                 <div class="w3ls-bottom">
-                    <h2>Hôm nay</h2>
+                    <h2>Sắp tới</h2>
+                    <div class="demo" v-for="item in next" :key="item.dt"></div>
                     <carousel :items="6" :autoplay="true" :loop="false" :nav="false" :dots="false">
-                        <div class="item" v-for="item in hour" :key="item.time">
+                        <div class="item" v-for="item in next" :key="item.dt">
                             <div class="biseller-column">
-                                <p>{{ item.time_epoch | date('HH:mm') }}</p>
+                                <p>{{ item.dt | date('HH:mm') }}</p>
+                                <p class="today">({{ item.dt | date('MM/DD') }})</p>
                                 <a class="lightbox">
-                                    <img :src="'https:'+item.condition.icon" :title="item.condition.text" />
+                                    <img :src="`${imageBaseUrl}${item.weather[0].icon}@2x.png`" :title="item.weather[0].description" />
                                 </a>
-                                <p>{{ item.temp_c }}<sup class="degree">°</sup><span>C</span></p>
+                                <p>{{ item.main.temp }}<sup class="degree">°</sup><span>C</span></p>
                             </div>
                         </div>
                     </carousel>
@@ -37,15 +39,15 @@
                 <div class="w3ls-bottom2">
                     <div class="ac-container">
                         <input id="ac-1" name="accordion-1" type="checkbox" />
-                        <label for="ac-1" class="grid1">Những ngày tới</label>
+                        <label for="ac-1" class="grid1">Trong ngày</label>
                         <article class="ac-small">
                             <div class="wthree-grids">
-                                <div class="wthree-grids-row" v-for="item in day" :key="item.date_epoch">
+                                <div class="wthree-grids-row" v-for="item in today" :key="item.dt">
                                     <ul class="top">
-                                        <li>{{ item.date_epoch | date('YYYY-MM-DD') }}</li>
-                                        <li class="wthree-img"><img :src="'https:'+item.day.condition.icon" :title="item.day.condition.text" /></li>
-                                        <li class="wthree-temp">{{ item.day.mintemp_c }} <sup class="degree">°</sup><span>C</span></li>
-                                        <li class="wthree-temp">{{ item.day.maxtemp_c }} <sup class="degree">°</sup><span>C</span></li>
+                                        <li>{{ item.dt | date('HH:mm') }}</li>
+                                        <li class="wthree-img"><img :src="`${imageBaseUrl}${item.weather[0].icon}@2x.png`" :title="item.weather[0].description" /></li>
+                                        <li class="wthree-temp">{{ item.main.temp_min }} <sup class="degree">°</sup><span>C</span></li>
+                                        <li class="wthree-temp">{{ item.main.temp_max }} <sup class="degree">°</sup><span>C</span></li>
                                     </ul>
                                     <div class="clear"> </div>
                                 </div>
@@ -66,13 +68,18 @@ import axios from 'axios'
 export default {
     name: 'app',
     data: () => ({
-        current: null,
-        location: null,
-        day: [],
-        hour: [],
+        now: null,
+        city: null,
+        today: [],
+        next: [],
         date: '',
         time: '',
     }),
+    computed: {
+        imageBaseUrl() {
+            return process.env ? process.env.VUE_APP_IMAGE_BASE_URL : ''
+        }
+    },
     created() {
         setInterval(() => {
             moment.locale('vi');
@@ -80,29 +87,29 @@ export default {
             this.date = moment().format('dddd, DD MMMM gggg');
         }, 1);
 
-        axios.get('https://geoip-db.com/json/').then(geo => {
+        axios.get(process.env.VUE_APP_GEO_ENDPOINT).then(geo => {
+            this.city = geo.data.city;
             axios.all([
-                axios.get(`https://api.apixu.com/v1/forecast.json`, {
+                axios.get(`${process.env.VUE_APP_WEATHER_ENDPOINT}weather`, {
                     params: {
-                        key: process.env.VUE_APP_API_KEY,
+                        APPID: process.env.VUE_APP_API_KEY,
                         q: geo.data.city,
                         lang: 'vi',
-                        days: '10'
+                        units: 'metric'
                     }
                 }),
-                axios.get(`https://api.apixu.com/v1/history.json`, {
+                axios.get(`${process.env.VUE_APP_WEATHER_ENDPOINT}forecast`, {
                     params: {
-                        key: process.env.VUE_APP_API_KEY,
+                        APPID: process.env.VUE_APP_API_KEY,
                         q: geo.data.city,
                         lang: 'vi',
-                        dt: moment().format('YYYY-MM-DD')
+                        units: 'metric'
                     }
                 })
-            ]).then(axios.spread((forecast, history) => {
-                this.current = forecast.data.current;
-                this.location = forecast.data.location;
-                this.day = forecast.data.forecast.forecastday;
-                this.hour = history.data.forecast.forecastday[0].hour;
+            ]).then(axios.spread((weather, forecast) => {
+                this.now = weather.data.main;
+                this.next = forecast.data.list;
+                this.today = forecast.data.list.filter(item => moment.unix(item.dt).format('DD') === moment().format('DD'));
             }));
         })
     },
@@ -392,6 +399,7 @@ img {
 
 .biseller-column:hover p {
     color: #00bbb4;
+    cursor: grab;
 }
 
 /*-- carousel --*/
@@ -406,6 +414,10 @@ img {
     -ms-border-radius: 3px;
     border-radius: 3px;
     text-align: center;
+    .today {
+        font-weight: bold;
+        font-size: 12px;
+    }
 }
 
 .customNavigation {
