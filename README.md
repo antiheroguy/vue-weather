@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c6aae17b-8417-4c4c-9b63-47d43776a89b/deploy-status)](https://app.netlify.com/sites/vuejs-weather/deploys)
+
 # vue-weather
 
 ## Project setup
