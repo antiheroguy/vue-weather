@@ -45,7 +45,7 @@
             >
               <div class="biseller-column">
                 <p>{{ item.dt | date('HH:mm') }}</p>
-                <p class="today">({{ item.dt | date('MM/DD') }})</p>
+                <p class="today">{{ item.dt | date('MM/DD') }}</p>
                 <a class="lightbox">
                   <img
                     :src="`${imageBaseUrl}/${item.weather[0].icon}@2x.png`"
@@ -138,7 +138,7 @@ export default {
       const { data: geo } = await axios.get(process.env.VUE_APP_GEO_ENDPOINT)
       this.city = geo.city
 
-      const [weather, forecast] = await axios.all([
+      const [{ data: { main } }, { data: { list } }] = await axios.all([
         axios.get(`${process.env.VUE_APP_WEATHER_ENDPOINT}/weather`, {
           params: {
             appid: process.env.VUE_APP_API_KEY,
@@ -156,9 +156,10 @@ export default {
           }
         })
       ])
-      this.now = weather.data.main
-      this.next = forecast.data.list
-      this.today = forecast.data.list.filter(item => moment.unix(item.dt).format('DD') === moment().format('DD'))
+
+      this.now = main
+      this.next = list
+      this.today = list.filter(item => moment.unix(item.dt).format('DD') === moment().format('DD'))
     },
 
     play() {
@@ -179,30 +180,6 @@ export default {
 </script>
 
 <style lang="less">
-/*--start editing from here--*/
-/* text align right */
-/* text align left */
-/* text align center */
-/* float right */
-/* float left */
-/* clear float */
-/* Position Relative */
-/* Position Absolute */
-/* vertical align baseline */
-/* vertical align top */
-/* vertical menu */
-/* horizontal menu */
-/*-- main --*/
-/*-- agileits-top --*/
-/*-- //agileits-top --*/
-/*-- carousel --*/
-/*-- //carousel --*/
-/*-- weak-accordion --*/
-/*-- //weak-accordion --*/
-/*-- //main --*/
-/*-- copyright --*/
-/*-- //copyright --*/
-/*-- responsive-design --*/
 html {
   margin: 0;
   padding: 0;
@@ -625,7 +602,6 @@ nav {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 fieldset {
@@ -732,7 +708,6 @@ article {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 aside {
@@ -741,7 +716,6 @@ aside {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 canvas {
@@ -758,7 +732,6 @@ details {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 embed {
@@ -775,7 +748,6 @@ figure {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 figcaption {
@@ -784,7 +756,6 @@ figcaption {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 footer {
@@ -793,7 +764,6 @@ footer {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 header {
@@ -802,7 +772,6 @@ header {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 hgroup {
@@ -811,7 +780,6 @@ hgroup {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 menu {
@@ -820,7 +788,6 @@ menu {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 output {
@@ -845,7 +812,6 @@ section {
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
   display: block;
 }
 summary {
