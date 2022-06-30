@@ -78,7 +78,7 @@
                   <ul class="top">
                     <li>{{ item.dt | date('HH:mm') }}</li>
                     <li class="wthree-img"><img
-                        :src="`${imageBaseUrl}${item.weather[0].icon}@2x.png`"
+                        :src="`${imageBaseUrl}/${item.weather[0].icon}@2x.png`"
                         :title="item.weather[0].description"
                       /></li>
                     <li class="wthree-temp">{{ item.main.temp_min }} <sup class="degree">°</sup><span>C</span></li>
