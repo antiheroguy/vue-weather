@@ -135,14 +135,14 @@ export default {
 
   methods: {
     async fetch() {
-      const { data: geo } = await axios.get(process.env.VUE_APP_GEO_ENDPOINT)
-      this.city = geo.city
+      const { data: cityName } = await axios.get(process.env.VUE_APP_GEO_ENDPOINT)
+      this.city = cityName
 
       const [{ data: { main } }, { data: { list } }] = await axios.all([
         axios.get(`${process.env.VUE_APP_WEATHER_ENDPOINT}/weather`, {
           params: {
             appid: process.env.VUE_APP_API_KEY,
-            q: geo.city,
+            q: cityName,
             lang: 'vi',
             units: 'metric'
           }
@@ -150,7 +150,7 @@ export default {
         axios.get(`${process.env.VUE_APP_WEATHER_ENDPOINT}/forecast`, {
           params: {
             appid: process.env.VUE_APP_API_KEY,
-            q: geo.city,
+            q: cityName,
             lang: 'vi',
             units: 'metric'
           }
