@@ -135,7 +135,7 @@ export default {
 
   methods: {
     async fetch() {
-      const { data: cityName } = await axios.get(process.env.VUE_APP_GEO_ENDPOINT)
+      const { data: { cityName } } = await axios.get(process.env.VUE_APP_GEO_ENDPOINT)
       this.city = cityName
 
       const [{ data: { main } }, { data: { list } }] = await axios.all([
