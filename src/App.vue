@@ -1,10 +1,6 @@
 <template>
   <div id="app">
-    <div
-      class="main"
-      v-if="now"
-      @click.once="play()"
-    >
+    <div class="main" v-if="now" @click.once="play()">
       <div class="main-wthree-row">
         <div class="agileits-top">
           <div class="agileinfo-top-row">
@@ -26,11 +22,7 @@
         </div>
         <div class="w3ls-bottom">
           <h2>Sắp tới</h2>
-          <div
-            class="demo"
-            v-for="item in next"
-            :key="item.dt"
-          ></div>
+          <div v-for="item in next" :key="item.dt"></div>
           <carousel
             :items="6"
             :autoplay="true"
@@ -38,36 +30,27 @@
             :nav="false"
             :dots="false"
           >
-            <div
-              class="item"
-              v-for="item in next"
-              :key="item.dt"
-            >
+            <div class="item" v-for="item in next" :key="item.dt">
               <div class="biseller-column">
-                <p>{{ item.dt | date('HH:mm') }}</p>
-                <p class="today">{{ item.dt | date('MM/DD') }}</p>
+                <p>{{ item.dt | date("HH:mm") }}</p>
+                <p class="today">{{ item.dt | date("MM/DD") }}</p>
                 <a class="lightbox">
                   <img
-                    :src="`${imageBaseUrl}/${item.weather[0].icon}@2x.png`"
+                    :src="`https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`"
                     :title="item.weather[0].description"
                   />
                 </a>
-                <p>{{ item.main.temp }}<sup class="degree">°</sup><span>C</span></p>
+                <p>
+                  {{ item.main.temp }}<sup class="degree">°</sup><span>C</span>
+                </p>
               </div>
             </div>
           </carousel>
         </div>
         <div class="w3ls-bottom2">
           <div class="ac-container">
-            <input
-              id="ac-1"
-              name="accordion-1"
-              type="checkbox"
-            />
-            <label
-              for="ac-1"
-              class="grid1"
-            >Trong ngày</label>
+            <input id="ac-1" name="accordion-1" type="checkbox" />
+            <label for="ac-1" class="grid1">Trong ngày</label>
             <article class="ac-small">
               <div class="wthree-grids">
                 <div
@@ -76,15 +59,23 @@
                   :key="item.dt"
                 >
                   <ul class="top">
-                    <li>{{ item.dt | date('HH:mm') }}</li>
-                    <li class="wthree-img"><img
-                        :src="`${imageBaseUrl}/${item.weather[0].icon}@2x.png`"
+                    <li>{{ item.dt | date("HH:mm") }}</li>
+                    <li class="wthree-img">
+                      <img
+                        :src="`https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`"
                         :title="item.weather[0].description"
-                      /></li>
-                    <li class="wthree-temp">{{ item.main.temp_min }} <sup class="degree">°</sup><span>C</span></li>
-                    <li class="wthree-temp">{{ item.main.temp_max }} <sup class="degree">°</sup><span>C</span></li>
+                      />
+                    </li>
+                    <li class="wthree-temp">
+                      {{ item.main.temp_min }} <sup class="degree">°</sup
+                      ><span>C</span>
+                    </li>
+                    <li class="wthree-temp">
+                      {{ item.main.temp_max }} <sup class="degree">°</sup
+                      ><span>C</span>
+                    </li>
                   </ul>
-                  <div class="clear"> </div>
+                  <div class="clear"></div>
                 </div>
               </div>
             </article>
@@ -92,91 +83,78 @@
         </div>
       </div>
     </div>
-    <audio
-      src="/background.mp3"
-      autoplay
-      loop
-      ref="audio"
-    ></audio>
+    <audio src="/background.mp3" autoplay loop ref="audio"></audio>
   </div>
 </template>
 <script>
-import carousel from 'vue-owl-carousel'
-import moment from 'moment'
-import axios from 'axios'
+import carousel from "vue-owl-carousel";
+import moment from "moment";
+import axios from "axios";
 
 export default {
-  name: 'app',
+  name: "app",
 
   data: () => ({
     now: null,
-    city: null,
+    city: 'Hanoi',
     today: [],
     next: [],
-    date: '',
-    time: '',
+    date: "",
+    time: "",
   }),
-
-  computed: {
-    imageBaseUrl() {
-      return process.env ? process.env.VUE_APP_IMAGE_BASE_URL : ''
-    }
-  },
 
   created() {
     setInterval(() => {
-      moment.locale('vi')
-      this.time = moment().format('HH:mm:ss')
-      this.date = moment().format('dddd, DD MMMM gggg')
-    }, 1)
+      moment.locale("vi");
+      this.time = moment().format("HH:mm:ss");
+      this.date = moment().format("dddd, DD MMMM gggg");
+    }, 500);
 
-    this.fetch()
+    this.fetch();
   },
 
   methods: {
     async fetch() {
-      const { data: { cityName } } = await axios.get(process.env.VUE_APP_GEO_ENDPOINT)
-      this.city = cityName
+      try {
+        const { data: { cityName } } = await axios.get("https://freeipapi.com/api/json");
+        this.city = cityName;
+      } catch (error) {
+        // Deal nothing
+      }
 
-      const [{ data: { main } }, { data: { list } }] = await axios.all([
-        axios.get(`${process.env.VUE_APP_WEATHER_ENDPOINT}/weather`, {
-          params: {
-            appid: process.env.VUE_APP_API_KEY,
-            q: cityName,
-            lang: 'vi',
-            units: 'metric'
-          }
-        }),
-        axios.get(`${process.env.VUE_APP_WEATHER_ENDPOINT}/forecast`, {
-          params: {
-            appid: process.env.VUE_APP_API_KEY,
-            q: cityName,
-            lang: 'vi',
-            units: 'metric'
-          }
-        })
-      ])
+      const params = {
+        appid: process.env.VUE_APP_API_KEY,
+        q: this.city,
+        lang: "vi",
+        units: "metric",
+      };
+      const [ { data: { main } }, { data: { list } }] = await axios.all([
+        axios.get("https://api.openweathermap.org/data/2.5/weather", { params }),
+        axios.get("https://api.openweathermap.org/data/2.5/forecast", { params }),
+      ]);
 
-      this.now = main
-      this.next = list
-      this.today = list.filter(item => moment.unix(item.dt).format('DD') === moment().format('DD'))
+      this.now = main;
+      this.next = list;
+      this.today = list.filter(
+        (item) => moment.unix(item.dt).format("DD") === moment().format("DD")
+      );
     },
 
     play() {
-      this.$refs.audio.play()
+      this.$refs.audio.play();
     },
   },
 
   filters: {
     date(value, format) {
-      return moment.unix(value).format(format)
+      return moment.unix(value).format(format);
     },
   },
 
   components: {
-    carousel
-  }
-}
+    carousel,
+  },
+};
 </script>
 
 <style lang="less">
